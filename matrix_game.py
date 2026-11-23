@@ -1,21 +1,9 @@
-"""
-MA3K7 Assignment 4: the Matrix game.
-Code accompanying the rubric. Run:  python matrix_game.py
-Prints every number quoted in the report and saves fig_random.png and fig_pairing.png.
-
-Conventions (see the Entry section of the report):
-  * Z writes 0s, O writes 1s, they alternate, and each move fills any empty cell.
-  * Z wins if the final n x n matrix is singular (det = 0), O wins otherwise.
-  * Both orders of play are considered ("Z first" or "O first").
-  * A board is stored as two bitmasks (z, o): bit i*n + j is cell (i, j).
-"""
 import random, time
 from itertools import combinations
 import numpy as np
 import matplotlib.pyplot as plt
 
-
-# ---------- exact determinant (integers only, no rounding errors) ----------
+#looking at exact determinant
 def det_int(M):
     """Bareiss fraction-free elimination: exact determinant of an integer matrix."""
     M = [row[:] for row in M]
@@ -55,7 +43,7 @@ def zero_block(z, n):
     return False
 
 
-# ---------- exact solver: memoised game-tree search ----------
+# looking at our solver
 def solve(n, z_first=True, z_target=singular):
     """True if Z wins under perfect play. z_target(z, o, n) says if a full board is a Z win.
     Returns (Z wins?, number of positions stored, seconds)."""
@@ -117,7 +105,7 @@ def solve_biased(n, pattern):
     return z_wins(0, 0)
 
 
-# ---------- the pairing strategy for n >= 4 ----------
+# strategy for n>=4
 def partner(c, n):
     """Pairs (1,j)-(2,j) and (3,j)-(4,j) (rows 0-3 here); other cells are free (None)."""
     i, j = divmod(c, n)
@@ -154,10 +142,10 @@ def verify_pairing(n, z_first):
         filled = z | o
         if filled == full:
             res = pairs_mixed(z, o, n) and singular(z, o, n)
-        elif (bin(filled).count("1") % 2 == 0) == z_first:       # Z to move
+        elif (bin(filled).count("1") % 2 == 0) == z_first:       
             c = pairing_move(z, o, n, last)
             res = ok(z | 1 << c, o, None)
-        else:                                                    # O to move: try all
+        else:                                                    
             res = all(ok(z, o | 1 << c, c) for c in range(N) if not (filled >> c) & 1)
         memo[key] = res
         return res
@@ -200,7 +188,7 @@ def random_singular_prob(n, z_first, trials, rng):
     return hits / trials
 
 
-# ---------- main ----------
+# main part
 if __name__ == "__main__":
     rng = random.Random(2026)
 
@@ -259,7 +247,7 @@ if __name__ == "__main__":
     for n, a, b in zip(ns, p_z, p_o):
         print(f"n={n:2d}  Z first {a:.4f}   O first {b:.4f}")
 
-    # determinant histogram for random 4 x 4 games (8 zeros, 8 ones)
+    # determinant histogram for random 4 x 4 games 
     dets = []
     for _ in range(20000):
         cells = [1] * 16
@@ -271,7 +259,7 @@ if __name__ == "__main__":
     print(f"\nrandom 4x4 games: P(det = 0) = {np.mean(dets == 0):.3f}, "
           f"det values {sorted(set(dets.tolist()))}")
 
-    # ---------- figures ----------
+    # all the figures i used
     fig, ax = plt.subplots(1, 2, figsize=(10, 3.6))
     vals, counts = np.unique(dets, return_counts=True)
     ax[0].bar(vals, counts / len(dets), color=["tab:red" if v == 0 else "tab:blue" for v in vals])
