@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 #looking at exact determinant
 def det_int(M):
-    """Bareiss fraction-free elimination: exact determinant of an integer matrix."""
+    """Exact determinant of an integer matrix."""
     M = [row[:] for row in M]
     n, sign, prev = len(M), 1, 1
     for k in range(n - 1):
