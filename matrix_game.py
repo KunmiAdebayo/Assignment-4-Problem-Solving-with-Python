@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 
 #looking at exact determinant
 def det_int(M):
-    """Exact determinant of an integer matrix."""
     M = [row[:] for row in M]
     n, sign, prev = len(M), 1, 1
     for k in range(n - 1):
@@ -25,7 +24,6 @@ def det_int(M):
 
 
 def to_matrix(z, o, n, a=0, b=1):
-    """Board -> matrix, Z's cells hold a and O's cells hold b."""
     return [[a if (z >> (i * n + j)) & 1 else b for j in range(n)] for i in range(n)]
 
 
@@ -34,7 +32,6 @@ def singular(z, o, n, a=0, b=1):
 
 
 def zero_block(z, n):
-    """True if the 0s contain an r x c all-zero submatrix with r + c = n + 1."""
     for r in range(1, n + 1):
         for rows in combinations(range(n), r):
             cols = sum(all((z >> (i * n + j)) & 1 for i in rows) for j in range(n))
@@ -43,10 +40,8 @@ def zero_block(z, n):
     return False
 
 
-# looking at our solver
+# looking at our solver and defining scenarios Z wins
 def solve(n, z_first=True, z_target=singular):
-    """True if Z wins under perfect play. z_target(z, o, n) says if a full board is a Z win.
-    Returns (Z wins?, number of positions stored, seconds)."""
     N, full, memo = n * n, (1 << n * n) - 1, {}
 
     def z_wins(z, o):
@@ -77,7 +72,6 @@ def solve(n, z_first=True, z_target=singular):
 
 
 def solve_biased(n, pattern):
-    """Like solve(), but the order of moves repeats `pattern`, e.g. 'ZOO' = O moves twice."""
     N, full, memo = n * n, (1 << n * n) - 1, {}
 
     def z_wins(z, o):
@@ -107,13 +101,11 @@ def solve_biased(n, pattern):
 
 # strategy for n>=4
 def partner(c, n):
-    """Pairs (1,j)-(2,j) and (3,j)-(4,j) (rows 0-3 here); other cells are free (None)."""
     i, j = divmod(c, n)
     return {0: 1, 1: 0, 2: 3, 3: 2}.get(i, None) * n + j if i < 4 else None
 
 
 def pairing_move(z, o, n, last):
-    """The pairing player's move, given the opponent's last cell (or None)."""
     filled = z | o
     empty = [c for c in range(n * n) if not (filled >> c) & 1]
     if last is not None and partner(last, n) is not None and partner(last, n) in empty:
@@ -126,13 +118,11 @@ def pairing_move(z, o, n, last):
 
 
 def pairs_mixed(z, o, n):
-    """True if every pair holds one 0 and one 1 (so row1+row2 = row3+row4 = all-ones)."""
+   
     return all(((z >> c) & 1) != ((z >> partner(c, n)) & 1) for c in range(2 * n))
 
 
 def verify_pairing(n, z_first):
-    """Play the pairing strategy for Z against EVERY sequence of O moves (memoised).
-    Returns True if every reachable final board has all pairs mixed and det = 0."""
     N, full, memo = n * n, (1 << n * n) - 1, {}
 
     def ok(z, o, last):
@@ -154,7 +144,6 @@ def verify_pairing(n, z_first):
 
 
 def play(n, z_first, z_policy, o_policy, rng):
-    """One game; a policy maps (z, o, n, last, rng) -> cell. Returns the final board."""
     z = o = 0
     last = None
     for k in range(n * n):
@@ -176,8 +165,6 @@ def pairing_policy(z, o, n, last, rng):
 
 
 def random_singular_prob(n, z_first, trials, rng):
-    """Both players random: the final board is a uniformly random arrangement of
-    ceil(n^2/2) (Z first) or floor(n^2/2) (O first) zeros."""
     zeros = (n * n + 1) // 2 if z_first else n * n // 2
     hits = 0
     for _ in range(trials):
