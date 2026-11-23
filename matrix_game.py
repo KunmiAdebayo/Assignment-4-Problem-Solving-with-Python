@@ -57,15 +57,15 @@ def solve(n, z_first=True, z_target=singular):
             res = z_target(z, o, n)
         else:
             z_turn = (bin(filled).count("1") % 2 == 0) == z_first
-            res = not z_turn                      # value if no move changes the outcome
+            res = not z_turn                      
             for c in range(N):
                 bit = 1 << c
                 if filled & bit:
                     continue
-                if z_turn and z_wins(z | bit, o):        # Z needs ONE winning move
+                if z_turn and z_wins(z | bit, o):        # emphasis on Z needing to win one
                     res = True
                     break
-                if not z_turn and not z_wins(z, o | bit):  # O needs ONE refutation
+                if not z_turn and not z_wins(z, o | bit):  
                     res = False
                     break
         memo[(z, o)] = res
